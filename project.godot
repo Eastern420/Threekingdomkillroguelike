@@ -1,0 +1,26 @@
+; Engine configuration file.
+; Godot 4.x project — 三國殺-inspired roguelike prototype
+
+config_version=5
+
+[application]
+
+config/name="Three Kingdom Kill Roguelike"
+config/description="A short 三國殺-inspired card combat roguelike prototype"
+run/main_scene="res://scenes/main_menu.tscn"
+config/features=PackedStringArray("4.2", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+
+RunManager="*res://scripts/run_manager.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[rendering]
+
+renderer/rendering_method="forward_plus"

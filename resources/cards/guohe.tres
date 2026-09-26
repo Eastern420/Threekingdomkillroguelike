@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/card_data.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c686f9dd40f838bda" path="res://assets/cards/break.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "guohe"
+name_zh = "过河拆桥"
+name_en = "BREAK"
+description = "Discard one random card from the opponent's hand."
+type = 3
+color = Color(0.55, 0.35, 0.15, 1)
+art = ExtResource("2")

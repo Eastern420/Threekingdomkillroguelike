@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/card_data.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c5082c801f07faf2e" path="res://assets/cards/atk.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "sha"
+name_zh = "殺"
+name_en = "ATK"
+description = "Deal 1 damage to the opponent. They may play DODGE to cancel."
+type = 0
+color = Color(0.75, 0.15, 0.15, 1)
+art = ExtResource("2")
