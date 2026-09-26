@@ -11,6 +11,10 @@ signal awaiting_dodge(attacker_is_player: bool)
 signal awaiting_player_discard(excess: int)
 ## A card was played from hand (either side), including reactive 閃.
 signal card_played(card: CardData, by_player: bool)
+## Cards moved from a combatant's deck into their hand.
+signal cards_drawn(cards: Array, by_player: bool)
+## A card entered a combatant's discard pile (play, dodge, or forced discard).
+signal card_discarded(card: CardData, by_player: bool)
 
 enum Phase {
 	DRAW,
@@ -40,8 +44,10 @@ func setup(p: Combatant, e: Combatant, limit: int = 5) -> void:
 func start_combat(extra_draw: int = 0) -> void:
 	player.shuffle_deck()
 	enemy.shuffle_deck()
-	player.draw_cards(4 + extra_draw)
-	enemy.draw_cards(4)
+	var opening_player := player.draw_cards(4 + extra_draw)
+	var opening_enemy := enemy.draw_cards(4)
+	_note_draw(player, opening_player)
+	_note_draw(enemy, opening_enemy)
 	_log("%s vs %s — fight!" % [player.display_name, enemy.display_name])
 	_begin_turn()
 
@@ -50,9 +56,26 @@ func _begin_turn() -> void:
 	sha_used_this_turn = false
 	var actor := _actor()
 	var drawn := actor.draw_cards(2)
+	_note_draw(actor, drawn)
 	_log("%s draws %d." % [actor.display_name, drawn.size()])
 	phase = Phase.PLAY
 	state_changed.emit()
+
+func _note_draw(who: Combatant, drawn: Array) -> void:
+	if drawn.is_empty():
+		return
+	cards_drawn.emit(drawn, who.is_player)
+
+func _bury(who: Combatant, card: CardData) -> void:
+	if card == null:
+		return
+	who.discard_pile.append(card)
+	card_discarded.emit(card, who.is_player)
+
+func _note_discard(who: Combatant, card: CardData) -> void:
+	if card == null:
+		return
+	card_discarded.emit(card, who.is_player)
 
 func _actor() -> Combatant:
 	return player if player_turn else enemy
@@ -106,6 +129,8 @@ func _enter_discard_phase() -> void:
 		state_changed.emit()
 	else:
 		var dropped := actor.discard_down_to(hand_limit)
+		for c in dropped:
+			_note_discard(actor, c)
 		if dropped.size() > 0:
 			_log("%s discards %d." % [actor.display_name, dropped.size()])
 		_finish_discard()
@@ -117,6 +142,7 @@ func player_discard_at(index: int) -> void:
 		return
 	var c := player.discard_from_hand(index)
 	if c:
+		_note_discard(player, c)
 		_log("You discard %s." % c.short_label())
 	if player.hand.size() <= hand_limit:
 		_finish_discard()
@@ -180,28 +206,30 @@ func _resolve_card(card: CardData, src: Combatant, tgt: Combatant, from_player: 
 	match card.type:
 		CardData.CardType.ATTACK:
 			sha_used_this_turn = true
-			src.discard_pile.append(card)
+			_bury(src, card)
 			_start_attack(src, tgt, from_player)
 			return
 		CardData.CardType.HEAL:
 			src.hp = mini(src.hp + 1, src.max_hp)
-			src.discard_pile.append(card)
+			_bury(src, card)
 			_log("%s heals to %d/%d." % [src.display_name, src.hp, src.max_hp])
 		CardData.CardType.DRAW:
-			src.discard_pile.append(card)
+			_bury(src, card)
 			var d := src.draw_cards(2)
+			_note_draw(src, d)
 			_log("%s draws %d (无中生有)." % [src.display_name, d.size()])
 		CardData.CardType.DISCARD:
-			src.discard_pile.append(card)
+			_bury(src, card)
 			var removed := tgt.discard_random_from_hand()
 			if removed:
+				_note_discard(tgt, removed)
 				_log("%s loses %s (过河拆桥)." % [tgt.display_name, removed.short_label()])
 			else:
 				_log("%s has no cards to discard." % tgt.display_name)
 		CardData.CardType.DODGE:
-			src.discard_pile.append(card)
+			_bury(src, card)
 		_:
-			src.discard_pile.append(card)
+			_bury(src, card)
 	_check_end()
 
 func _start_attack(src: Combatant, tgt: Combatant, from_player: bool) -> void:
@@ -219,7 +247,7 @@ func _start_attack(src: Combatant, tgt: Combatant, from_player: bool) -> void:
 			var di := tgt.find_first_of_type(CardData.CardType.DODGE)
 			var dodge_card := tgt.hand[di]
 			tgt.hand.remove_at(di)
-			tgt.discard_pile.append(dodge_card)
+			_bury(tgt, dodge_card)
 			card_played.emit(dodge_card, false)
 			_log("%s plays 閃 — cancelled!" % tgt.display_name)
 		else:
@@ -235,7 +263,7 @@ func respond_dodge(use_dodge: bool) -> void:
 		if di >= 0:
 			var dodge_card := tgt.hand[di]
 			tgt.hand.remove_at(di)
-			tgt.discard_pile.append(dodge_card)
+			_bury(tgt, dodge_card)
 			card_played.emit(dodge_card, true)
 			_log("You play 閃 — cancelled!")
 		else:

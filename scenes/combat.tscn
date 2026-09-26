@@ -1,6 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://bqcombat001"]
+[gd_scene load_steps=11 format=3 uid="uid://bqcombat001"]
 
 [ext_resource type="Script" path="res://scripts/combat_view.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/cards/dodge.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/cards/atk.png" id="3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
 content_margin_left = 10.0
@@ -31,6 +33,82 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 shadow_color = Color(0, 0, 0, 0.55)
 shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_zone"]
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+bg_color = Color(0.13, 0.12, 0.11, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 0.58, 0.28, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dodge"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.08, 0.16, 0.12, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.35, 0.78, 0.48, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hit"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.2, 0.07, 0.07, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.86, 0.22, 0.18, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
+bg_color = Color(0.08, 0.08, 0.09, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.45, 0.38, 0.22, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_choice"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.07, 0.08, 0.09, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.86, 0.7, 0.32, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="Combat" type="Control"]
 layout_mode = 3
@@ -110,17 +188,193 @@ theme_override_font_sizes/font_size = 20
 text = "Phase"
 horizontal_alignment = 1
 
-[node name="LogPanel" type="PanelContainer" parent="Root"]
-custom_minimum_size = Vector2(0, 170)
+[node name="Table" type="HBoxContainer" parent="Root"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 10
 
-[node name="LogText" type="Label" parent="Root/LogPanel"]
+[node name="DrawZone" type="PanelContainer" parent="Root/Table"]
+custom_minimum_size = Vector2(168, 132)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_zone")
+
+[node name="DrawInner" type="VBoxContainer" parent="Root/Table/DrawZone"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DrawTitle" type="Label" parent="Root/Table/DrawZone/DrawInner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.84, 0.5, 1)
+theme_override_font_sizes/font_size = 18
+text = "Draw"
+horizontal_alignment = 1
+
+[node name="DrawPiles" type="HBoxContainer" parent="Root/Table/DrawZone/DrawInner"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PlayerDraw" type="VBoxContainer" parent="Root/Table/DrawZone/DrawInner/DrawPiles"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="PlayerDrawBack" type="Control" parent="Root/Table/DrawZone/DrawInner/DrawPiles/PlayerDraw"]
+custom_minimum_size = Vector2(52, 72)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PlayerDrawCount" type="Label" parent="Root/Table/DrawZone/DrawInner/DrawPiles/PlayerDraw"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+
+[node name="PlayerDrawName" type="Label" parent="Root/Table/DrawZone/DrawInner/DrawPiles/PlayerDraw"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.82, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+text = "You"
+horizontal_alignment = 1
+
+[node name="EnemyDraw" type="VBoxContainer" parent="Root/Table/DrawZone/DrawInner/DrawPiles"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="EnemyDrawBack" type="Control" parent="Root/Table/DrawZone/DrawInner/DrawPiles/EnemyDraw"]
+custom_minimum_size = Vector2(52, 72)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="EnemyDrawCount" type="Label" parent="Root/Table/DrawZone/DrawInner/DrawPiles/EnemyDraw"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+
+[node name="EnemyDrawName" type="Label" parent="Root/Table/DrawZone/DrawInner/DrawPiles/EnemyDraw"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.82, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+text = "Foe"
+horizontal_alignment = 1
+
+[node name="LogPanel" type="PanelContainer" parent="Root/Table"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LogText" type="Label" parent="Root/Table/LogPanel"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Combat log…"
 autowrap_mode = 3
-vertical_alignment = 2
+vertical_alignment = 1
+
+[node name="DiscardZone" type="PanelContainer" parent="Root/Table"]
+custom_minimum_size = Vector2(176, 132)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_zone")
+
+[node name="DiscardInner" type="VBoxContainer" parent="Root/Table/DiscardZone"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DiscardTitle" type="Label" parent="Root/Table/DiscardZone/DiscardInner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.84, 0.5, 1)
+theme_override_font_sizes/font_size = 18
+text = "Discard"
+horizontal_alignment = 1
+
+[node name="DiscardPiles" type="HBoxContainer" parent="Root/Table/DiscardZone/DiscardInner"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PlayerDiscard" type="VBoxContainer" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="PlayerDiscardSlot" type="Panel" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/PlayerDiscard"]
+custom_minimum_size = Vector2(56, 78)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="PlayerDiscardArt" type="TextureRect" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/PlayerDiscard/PlayerDiscardSlot"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayerDiscardCount" type="Label" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/PlayerDiscard"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+
+[node name="PlayerDiscardName" type="Label" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/PlayerDiscard"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.82, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+text = "You"
+horizontal_alignment = 1
+
+[node name="EnemyDiscard" type="VBoxContainer" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="EnemyDiscardSlot" type="Panel" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/EnemyDiscard"]
+custom_minimum_size = Vector2(56, 78)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="EnemyDiscardArt" type="TextureRect" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/EnemyDiscard/EnemyDiscardSlot"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EnemyDiscardCount" type="Label" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/EnemyDiscard"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+
+[node name="EnemyDiscardName" type="Label" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/EnemyDiscard"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.82, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+text = "Foe"
+horizontal_alignment = 1
 
 [node name="DiscardHint" type="Label" parent="Root"]
 visible = false
@@ -142,7 +396,7 @@ layout_mode = 2
 text = "HP"
 
 [node name="HandArea" type="ScrollContainer" parent="Root"]
-custom_minimum_size = Vector2(0, 160)
+custom_minimum_size = Vector2(0, 142)
 layout_mode = 2
 size_flags_vertical = 0
 horizontal_scroll_mode = 1
@@ -152,6 +406,74 @@ vertical_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
+
+[node name="ResponseChoice" type="PanelContainer" parent="Root"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_choice")
+
+[node name="ResponseInner" type="VBoxContainer" parent="Root/ResponseChoice"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Prompt" type="Label" parent="Root/ResponseChoice/ResponseInner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.88, 0.6, 1)
+theme_override_font_sizes/font_size = 16
+text = "Respond to the attack"
+horizontal_alignment = 1
+
+[node name="ChoiceBox" type="HBoxContainer" parent="Root/ResponseChoice/ResponseInner"]
+layout_mode = 2
+theme_override_constants/separation = 36
+alignment = 1
+
+[node name="DodgeCol" type="VBoxContainer" parent="Root/ResponseChoice/ResponseInner/ChoiceBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="DodgeFrame" type="PanelContainer" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/DodgeCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dodge")
+
+[node name="DodgeButton" type="TextureButton" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/DodgeCol/DodgeFrame"]
+custom_minimum_size = Vector2(108, 150)
+layout_mode = 2
+texture_normal = ExtResource("2")
+ignore_texture_size = true
+stretch_mode = 6
+
+[node name="DodgeCaption" type="Label" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/DodgeCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.95, 0.78, 1)
+theme_override_font_sizes/font_size = 18
+text = "Dodge"
+horizontal_alignment = 1
+
+[node name="HitCol" type="VBoxContainer" parent="Root/ResponseChoice/ResponseInner/ChoiceBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="HitFrame" type="PanelContainer" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/HitCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hit")
+
+[node name="HitButton" type="TextureButton" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/HitCol/HitFrame"]
+custom_minimum_size = Vector2(108, 150)
+layout_mode = 2
+texture_normal = ExtResource("3")
+ignore_texture_size = true
+stretch_mode = 6
+
+[node name="HitCaption" type="Label" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/HitCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.72, 0.66, 1)
+theme_override_font_sizes/font_size = 18
+text = "Take the Hit"
+horizontal_alignment = 1
 
 [node name="Actions" type="HBoxContainer" parent="Root"]
 layout_mode = 2
@@ -163,17 +485,15 @@ custom_minimum_size = Vector2(140, 40)
 layout_mode = 2
 text = "End Turn"
 
-[node name="Dodge" type="Button" parent="Root/Actions"]
-visible = false
-custom_minimum_size = Vector2(140, 40)
-layout_mode = 2
-text = "Play 閃 (Dodge)"
-
-[node name="TakeHit" type="Button" parent="Root/Actions"]
-visible = false
-custom_minimum_size = Vector2(140, 40)
-layout_mode = 2
-text = "Take the Hit"
+[node name="FlyLayer" type="Control" parent="."]
+z_index = 12
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="PlayReveal" type="Control" parent="."]
 z_index = 20
