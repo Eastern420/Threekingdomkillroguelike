@@ -9,6 +9,8 @@ signal state_changed
 signal combat_ended(player_won: bool)
 signal awaiting_dodge(attacker_is_player: bool)
 signal awaiting_player_discard(excess: int)
+## A card was played from hand (either side), including reactive 閃.
+signal card_played(card: CardData, by_player: bool)
 
 enum Phase {
 	DRAW,
@@ -173,6 +175,7 @@ func _find_legal(t: CardData.CardType) -> int:
 	return -1
 
 func _resolve_card(card: CardData, src: Combatant, tgt: Combatant, from_player: bool) -> void:
+	card_played.emit(card, from_player)
 	_log("%s plays %s." % [src.display_name, card.display_name()])
 	match card.type:
 		CardData.CardType.ATTACK:
@@ -217,6 +220,7 @@ func _start_attack(src: Combatant, tgt: Combatant, from_player: bool) -> void:
 			var dodge_card := tgt.hand[di]
 			tgt.hand.remove_at(di)
 			tgt.discard_pile.append(dodge_card)
+			card_played.emit(dodge_card, false)
 			_log("%s plays 閃 — cancelled!" % tgt.display_name)
 		else:
 			_apply_damage(tgt, 1)
@@ -232,6 +236,7 @@ func respond_dodge(use_dodge: bool) -> void:
 			var dodge_card := tgt.hand[di]
 			tgt.hand.remove_at(di)
 			tgt.discard_pile.append(dodge_card)
+			card_played.emit(dodge_card, true)
 			_log("You play 閃 — cancelled!")
 		else:
 			_apply_damage(tgt, 1)

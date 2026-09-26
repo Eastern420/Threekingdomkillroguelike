@@ -1,6 +1,36 @@
-[gd_scene load_steps=2 format=3 uid="uid://bqcombat001"]
+[gd_scene load_steps=4 format=3 uid="uid://bqcombat001"]
 
 [ext_resource type="Script" path="res://scripts/combat_view.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
+content_margin_left = 10.0
+content_margin_top = 2.0
+content_margin_right = 10.0
+content_margin_bottom = 2.0
+bg_color = Color(0.1, 0.08, 0.06, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.9, 0.74, 0.34, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_frame"]
+bg_color = Color(0.06, 0.05, 0.04, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.93, 0.76, 0.34, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 14
 
 [node name="Combat" type="Control"]
 layout_mode = 3
@@ -46,9 +76,33 @@ text = "Enemy"
 layout_mode = 2
 text = "HP"
 
-[node name="EnemyHand" type="Label" parent="Root/EnemyPanel"]
+[node name="EnemyHand" type="HBoxContainer" parent="Root/EnemyPanel"]
+custom_minimum_size = Vector2(0, 86)
 layout_mode = 2
-text = "Hand"
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Backs" type="HBoxContainer" parent="Root/EnemyPanel/EnemyHand"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = -40
+
+[node name="CountBadge" type="PanelContainer" parent="Root/EnemyPanel/EnemyHand"]
+custom_minimum_size = Vector2(44, 32)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
+tooltip_text = "Opponent hand"
+
+[node name="CountLabel" type="Label" parent="Root/EnemyPanel/EnemyHand/CountBadge"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.98, 0.94, 0.84, 1)
+theme_override_font_sizes/font_size = 18
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PhaseLabel" type="Label" parent="Root"]
 layout_mode = 2
@@ -120,3 +174,41 @@ visible = false
 custom_minimum_size = Vector2(140, 40)
 layout_mode = 2
 text = "Take the Hit"
+
+[node name="PlayReveal" type="Control" parent="."]
+z_index = 20
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="RevealGroup" type="Control" parent="PlayReveal"]
+visible = false
+layout_mode = 0
+mouse_filter = 2
+
+[node name="Frame" type="Panel" parent="PlayReveal/RevealGroup"]
+layout_mode = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_frame")
+
+[node name="Art" type="TextureRect" parent="PlayReveal/RevealGroup/Frame"]
+layout_mode = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayLabel" type="Label" parent="PlayReveal/RevealGroup"]
+visible = false
+layout_mode = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.97, 0.88, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.03, 0.02, 0.92)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 15
+text = "Opponent plays"
+horizontal_alignment = 1
+vertical_alignment = 1
