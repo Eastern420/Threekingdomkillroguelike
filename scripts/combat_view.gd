@@ -1,16 +1,17 @@
 extends Control
 
 ## Combat UI. Player hand shows card faces; opponent hand is backs + a count.
-## Played cards briefly face-up in the center, then fly into the discard pile.
-## Textures: res://assets/ui/ (see COMBAT_UI_SPEC.md).
+## A played card flies from that side's hand into the center, holds, then goes to the discard.
+## Textures: res://assets/ui/ (see COMBAT_UI_SPEC.md). HP is shown on bars.
 
 const HAND_CARD_SIZE := Vector2(96, 134)
 const REVEAL_SIZE_MULT := 1.7
 const FRAME_BORDER := 6.0
-const REVEAL_IN_SEC := 0.15
 const REVEAL_HOLD_SEC := 0.8
 const REVEAL_OUT_SEC := 0.2
-const REVEAL_START_SCALE := 0.92
+## Flight from the playing hand into the gold center frame. Hold/fade run after arrival.
+const ORIGIN_FLY_SEC := 0.36
+const ORIGIN_ARC := 64.0
 const LABEL_H := 22.0
 const LABEL_GAP := 8.0
 const DRAW_PILE_SIZE := Vector2(72, 100)
@@ -26,11 +27,13 @@ const CHOICE_BTN := Vector2(360, 192)
 const UI_BACK := "res://assets/ui/card_back.png"
 
 @onready var enemy_name_lbl: Label = $Root/EnemyPanel/EnemyName
-@onready var enemy_hp_lbl: Label = $Root/EnemyPanel/EnemyHP
+@onready var enemy_hp_bar: ProgressBar = $Root/EnemyPanel/EnemyHPWrap/EnemyHPBar
+@onready var enemy_hp_lbl: Label = $Root/EnemyPanel/EnemyHPWrap/EnemyHP
 @onready var enemy_backs: HBoxContainer = $Root/EnemyPanel/EnemyRow/EnemyHand/Backs
 @onready var enemy_count_lbl: Label = $Root/EnemyPanel/EnemyRow/EnemyHand/CountBadge/CountLabel
 @onready var player_name_lbl: Label = $Root/PlayerPanel/PlayerName
-@onready var player_hp_lbl: Label = $Root/PlayerPanel/PlayerHP
+@onready var player_hp_bar: ProgressBar = $Root/PlayerPanel/PlayerHPWrap/PlayerHPBar
+@onready var player_hp_lbl: Label = $Root/PlayerPanel/PlayerHPWrap/PlayerHP
 @onready var phase_lbl: Label = $Root/PhaseLabel
 @onready var log_lbl: Label = $Root/LogPanel/LogText
 @onready var hand_area: ScrollContainer = $Root/HandRow/HandArea
@@ -42,6 +45,7 @@ const UI_BACK := "res://assets/ui/card_back.png"
 @onready var dodge_host: Control = $ResponseOverlay/ChoicePanel/ChoiceRow/DodgeHost
 @onready var dodge_rim: Panel = $ResponseOverlay/ChoicePanel/ChoiceRow/DodgeHost/DodgeRim
 @onready var dodge_btn: TextureButton = $ResponseOverlay/ChoicePanel/ChoiceRow/DodgeHost/DodgeButton
+@onready var dodge_card: TextureRect = $ResponseOverlay/ChoicePanel/ChoiceRow/DodgeHost/DodgeButton/DodgeCard
 @onready var hit_host: Control = $ResponseOverlay/ChoicePanel/ChoiceRow/HitHost
 @onready var hit_rim: Panel = $ResponseOverlay/ChoicePanel/ChoiceRow/HitHost/HitRim
 @onready var hit_btn: TextureButton = $ResponseOverlay/ChoicePanel/ChoiceRow/HitHost/HitButton
@@ -152,11 +156,11 @@ func _refresh() -> void:
 	if ctrl == null:
 		return
 	enemy_name_lbl.text = ctrl.enemy.display_name
-	enemy_hp_lbl.text = "HP %d / %d" % [ctrl.enemy.hp, ctrl.enemy.max_hp]
+	_sync_hp(enemy_hp_bar, enemy_hp_lbl, ctrl.enemy.hp, ctrl.enemy.max_hp)
 	_align_tracking(false)
 	_sync_enemy_hand()
 	player_name_lbl.text = ctrl.player.display_name
-	player_hp_lbl.text = "HP %d / %d" % [ctrl.player.hp, ctrl.player.max_hp]
+	_sync_hp(player_hp_bar, player_hp_lbl, ctrl.player.hp, ctrl.player.max_hp)
 	_align_tracking(true)
 	_sync_piles()
 	_sync_response_choice()
@@ -274,6 +278,8 @@ func _sync_response_choice() -> void:
 func _bind_choice_buttons() -> void:
 	dodge_host.pivot_offset = CHOICE_BTN * 0.5
 	hit_host.pivot_offset = CHOICE_BTN * 0.5
+	dodge_btn.tooltip_text = "Play DODGE"
+	dodge_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	dodge_btn.mouse_entered.connect(func() -> void: _set_choice_pointer(true, true))
 	dodge_btn.mouse_exited.connect(func() -> void: _set_choice_pointer(true, false))
 	dodge_btn.focus_entered.connect(func() -> void: _set_choice_focus(true, true))
@@ -407,6 +413,8 @@ func _configure_reveal_layout() -> void:
 	_center_reveal()
 
 func _center_reveal() -> void:
+	if _reveal_playing:
+		return
 	if reveal_group == null or reveal_layer == null:
 		return
 	var frame_size := reveal_group.size
@@ -415,12 +423,33 @@ func _center_reveal() -> void:
 	reveal_group.pivot_offset = frame_size * 0.5
 	reveal_group.position = (reveal_layer.size - frame_size) * 0.5
 
+func _sync_hp(bar: ProgressBar, lbl: Label, hp: int, max_hp: int) -> void:
+	var cap := maxi(max_hp, 1)
+	var shown := clampi(hp, 0, cap)
+	bar.max_value = cap
+	bar.value = shown
+	lbl.text = "%d / %d" % [shown, max_hp]
+	var fill := StyleBoxFlat.new()
+	var ratio := float(shown) / float(cap)
+	fill.bg_color = Color(0.77, 0.16, 0.22) if ratio <= 0.34 else Color(0.2, 0.7, 0.38)
+	fill.corner_radius_top_left = 6
+	fill.corner_radius_top_right = 6
+	fill.corner_radius_bottom_right = 6
+	fill.corner_radius_bottom_left = 6
+	bar.add_theme_stylebox_override("fill", fill)
+
 func _on_card_played(card: CardData, by_player: bool) -> void:
 	_reveal_serial += 1
 	var token := _reveal_serial
 	_hold_next_discard = true
 	_hold_discard_token = token
-	_reveal_queue.append({"card": card, "by_player": by_player, "token": token})
+	var origin := _peek_lost_card_origin(by_player)
+	_reveal_queue.append({
+		"card": card,
+		"by_player": by_player,
+		"token": token,
+		"origin": origin,
+	})
 	if not _reveal_playing:
 		_play_next_reveal()
 
@@ -439,20 +468,49 @@ func _play_next_reveal() -> void:
 	_reveal_token = int(item["token"])
 	reveal_label.visible = not by_player
 	reveal_art.texture = card.get_art()
-	_center_reveal()
-	reveal_group.visible = true
+	var frame_size := reveal_group.size
+	reveal_group.pivot_offset = frame_size * 0.5
+	var end_pos := (reveal_layer.size - frame_size) * 0.5
+	var origin: Vector2 = item.get("origin", Vector2.ZERO)
+	var start_pos := end_pos
+	if origin != Vector2.ZERO:
+		start_pos = _reveal_pos_for_center(origin)
+	var start_scale := HAND_CARD_SIZE.x / frame_size.x if frame_size.x > 1.0 else 0.55
+	reveal_group.position = start_pos
+	reveal_group.scale = Vector2(start_scale, start_scale)
 	reveal_group.modulate = Color(1, 1, 1, 0)
-	reveal_group.scale = Vector2(REVEAL_START_SCALE, REVEAL_START_SCALE)
+	reveal_group.visible = true
+	var start_c := start_pos + frame_size * 0.5
+	var end_c := end_pos + frame_size * 0.5
+	var side := ORIGIN_ARC if by_player else -ORIGIN_ARC
+	var control := (start_c + end_c) * 0.5 + Vector2(side, 0)
 	if _reveal_tween != null and _reveal_tween.is_valid():
 		_reveal_tween.kill()
 	_reveal_tween = create_tween()
-	_reveal_tween.tween_property(reveal_group, "modulate:a", 1.0, REVEAL_IN_SEC)
-	_reveal_tween.parallel().tween_property(reveal_group, "scale", Vector2.ONE, REVEAL_IN_SEC) \
-		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_reveal_tween.tween_interval(REVEAL_HOLD_SEC)
+	_reveal_tween.set_parallel(true)
+	_reveal_tween.tween_method(
+		_reveal_arc_step.bind(start_c, control, end_c, frame_size),
+		0.0, 1.0, ORIGIN_FLY_SEC
+	).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	_reveal_tween.tween_property(reveal_group, "scale", Vector2.ONE, ORIGIN_FLY_SEC) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	_reveal_tween.tween_property(reveal_group, "modulate:a", 1.0, 0.1)
+	_reveal_tween.chain().tween_interval(REVEAL_HOLD_SEC)
 	_reveal_tween.tween_callback(_on_reveal_hold_ended)
 	_reveal_tween.tween_property(reveal_group, "modulate:a", 0.0, REVEAL_OUT_SEC)
 	_reveal_tween.tween_callback(_on_reveal_finished)
+
+func _reveal_arc_step(t: float, start: Vector2, control: Vector2, end: Vector2, frame_size: Vector2) -> void:
+	if not is_instance_valid(reveal_group):
+		return
+	var p := _quad(start, control, end, t)
+	reveal_group.position = p - frame_size * 0.5
+
+func _reveal_pos_for_center(global_center: Vector2) -> Vector2:
+	var local_center := global_center
+	if reveal_layer != null:
+		local_center = reveal_layer.get_global_transform().affine_inverse() * global_center
+	return local_center - reveal_group.size * 0.5
 
 func _on_reveal_hold_ended() -> void:
 	_flush_discard_flights(_reveal_token)
@@ -625,24 +683,39 @@ func _start_discard_flight(card: CardData, by_player: bool, from_reveal: bool, h
 		"from_scale": Vector2.ONE,
 		"to_scale": to_scale,
 		"trans": Tween.TRANS_CUBIC,
-		"z": 25,
+		"z": 50,
 		"on_done": _show_discard_landed.bind(card),
 	})
 
+func _peek_lost_card_origin(by_player: bool) -> Vector2:
+	return _origin_at_lost_index(by_player, _lost_card_index(by_player))
+
 func _take_lost_card_origin(by_player: bool) -> Vector2:
-	var order: Array[CardData] = _player_order if by_player else _enemy_order
-	var nodes: Array[Control] = _player_nodes if by_player else _enemy_nodes
-	var now: Array = ctrl.player.hand if by_player else ctrl.enemy.hand
-	var box: Control = hand_box if by_player else enemy_backs
-	var idx := _first_removed_index(order, now)
-	var origin := _center_of(box)
-	if idx >= 0 and idx < nodes.size() and is_instance_valid(nodes[idx]):
-		var slot_center := _center_of(nodes[idx])
-		if slot_center != Vector2.ZERO:
-			origin = slot_center
+	var idx := _lost_card_index(by_player)
+	var origin := _origin_at_lost_index(by_player, idx)
 	if idx >= 0:
 		_drop_tracked_index(by_player, idx)
 	return origin
+
+func _lost_card_index(by_player: bool) -> int:
+	var order: Array[CardData] = _player_order if by_player else _enemy_order
+	var now: Array = ctrl.player.hand if by_player else ctrl.enemy.hand
+	return _first_removed_index(order, now)
+
+func _origin_at_lost_index(by_player: bool, idx: int) -> Vector2:
+	var nodes: Array[Control] = _player_nodes if by_player else _enemy_nodes
+	var box: Control = hand_box if by_player else enemy_backs
+	if idx >= 0 and idx < nodes.size() and is_instance_valid(nodes[idx]):
+		var slot_center := _center_of(nodes[idx])
+		if slot_center != Vector2.ZERO:
+			return slot_center
+	var area := _center_of(box)
+	if area != Vector2.ZERO:
+		return area
+	var rect := get_global_rect()
+	if by_player:
+		return rect.position + Vector2(size.x * 0.5, size.y - 90.0)
+	return rect.position + Vector2(size.x * 0.5, 72.0)
 
 func _first_removed_index(old: Array, now: Array) -> int:
 	if old.size() != now.size() + 1:

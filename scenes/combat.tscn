@@ -1,9 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://bqcombat001"]
+[gd_scene load_steps=13 format=3 uid="uid://bqcombat001"]
 
 [ext_resource type="Script" path="res://scripts/combat_view.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/ui/choice_panel_bg.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/ui/choice_dodge.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/ui/choice_take_hit.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/cards/dodge.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/choice_lose_hp.png" id="4"]
 [ext_resource type="Texture2D" path="res://assets/ui/pile_draw_marker.png" id="5"]
 [ext_resource type="Texture2D" path="res://assets/ui/pile_discard_marker.png" id="6"]
 
@@ -49,6 +49,41 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
+content_margin_left = 3.0
+content_margin_top = 3.0
+content_margin_right = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.1, 0.09, 0.08, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.78, 0.64, 0.32, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fill"]
+bg_color = Color(0.2, 0.7, 0.38, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dodge_tray"]
+bg_color = Color(0.07, 0.1, 0.12, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.78, 0.64, 0.32, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
 [node name="Combat" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -89,9 +124,41 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "Enemy"
 
-[node name="EnemyHP" type="Label" parent="Root/EnemyPanel"]
+[node name="EnemyHPWrap" type="Control" parent="Root/EnemyPanel"]
+custom_minimum_size = Vector2(320, 26)
 layout_mode = 2
-text = "HP"
+size_flags_horizontal = 0
+mouse_filter = 2
+
+[node name="EnemyHPBar" type="ProgressBar" parent="Root/EnemyPanel/EnemyHPWrap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
+max_value = 4.0
+value = 4.0
+show_percentage = false
+
+[node name="EnemyHP" type="Label" parent="Root/EnemyPanel/EnemyHPWrap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.98, 0.96, 0.92, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.04, 0.03, 0.92)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 14
+text = "4 / 4"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="EnemyRow" type="HBoxContainer" parent="Root/EnemyPanel"]
 layout_mode = 2
@@ -160,9 +227,41 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "You"
 
-[node name="PlayerHP" type="Label" parent="Root/PlayerPanel"]
+[node name="PlayerHPWrap" type="Control" parent="Root/PlayerPanel"]
+custom_minimum_size = Vector2(320, 26)
 layout_mode = 2
-text = "HP"
+size_flags_horizontal = 0
+mouse_filter = 2
+
+[node name="PlayerHPBar" type="ProgressBar" parent="Root/PlayerPanel/PlayerHPWrap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
+max_value = 4.0
+value = 4.0
+show_percentage = false
+
+[node name="PlayerHP" type="Label" parent="Root/PlayerPanel/PlayerHPWrap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.98, 0.96, 0.92, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.04, 0.03, 0.92)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 14
+text = "4 / 4"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="HandRow" type="HBoxContainer" parent="Root"]
 layout_mode = 2
@@ -181,6 +280,7 @@ vertical_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
+alignment = 1
 
 [node name="Actions" type="HBoxContainer" parent="Root"]
 layout_mode = 2
@@ -311,7 +411,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="PlayReveal" type="Control" parent="."]
-z_index = 20
+z_index = 40
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -420,8 +520,28 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture_normal = ExtResource("3")
 ignore_texture_size = true
+stretch_mode = 5
+
+[node name="DodgeTray" type="Panel" parent="ResponseOverlay/ChoicePanel/ChoiceRow/DodgeHost/DodgeButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dodge_tray")
+
+[node name="DodgeCard" type="TextureRect" parent="ResponseOverlay/ChoicePanel/ChoiceRow/DodgeHost/DodgeButton"]
+layout_mode = 0
+offset_left = 117.0
+offset_top = 8.0
+offset_right = 243.0
+offset_bottom = 184.0
+mouse_filter = 2
+texture = ExtResource("3")
+expand_mode = 1
 stretch_mode = 5
 
 [node name="HitHost" type="Control" parent="ResponseOverlay/ChoicePanel/ChoiceRow"]
@@ -449,3 +569,4 @@ grow_vertical = 2
 texture_normal = ExtResource("4")
 ignore_texture_size = true
 stretch_mode = 5
+tooltip_text = "Take the hit (−HP)"
