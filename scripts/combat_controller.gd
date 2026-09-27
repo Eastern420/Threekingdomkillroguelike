@@ -6,6 +6,8 @@ extends RefCounted
 
 signal log_message(text: String)
 signal state_changed
+## Fired at the moment HP is written (damage or heal), before the next full refresh.
+signal hp_changed
 signal combat_ended(player_won: bool)
 signal awaiting_dodge(attacker_is_player: bool)
 signal awaiting_player_discard(excess: int)
@@ -57,7 +59,7 @@ func _begin_turn() -> void:
 	var actor := _actor()
 	var drawn := actor.draw_cards(2)
 	_note_draw(actor, drawn)
-	_log("%s draws %d." % [actor.display_name, drawn.size()])
+	_log_who(actor, "draws %d." % drawn.size())
 	phase = Phase.PLAY
 	state_changed.emit()
 
@@ -132,7 +134,7 @@ func _enter_discard_phase() -> void:
 		for c in dropped:
 			_note_discard(actor, c)
 		if dropped.size() > 0:
-			_log("%s discards %d." % [actor.display_name, dropped.size()])
+			_log_who(actor, "discards %d." % dropped.size())
 		_finish_discard()
 
 func player_discard_at(index: int) -> void:
@@ -202,7 +204,7 @@ func _find_legal(t: CardData.CardType) -> int:
 
 func _resolve_card(card: CardData, src: Combatant, tgt: Combatant, from_player: bool) -> void:
 	card_played.emit(card, from_player)
-	_log("%s plays %s." % [src.display_name, card.display_name()])
+	_log_who(src, "plays %s." % card.display_name())
 	match card.type:
 		CardData.CardType.ATTACK:
 			sha_used_this_turn = true
@@ -212,20 +214,21 @@ func _resolve_card(card: CardData, src: Combatant, tgt: Combatant, from_player: 
 		CardData.CardType.HEAL:
 			src.hp = mini(src.hp + 1, src.max_hp)
 			_bury(src, card)
-			_log("%s heals to %d/%d." % [src.display_name, src.hp, src.max_hp])
+			_log_who(src, "heals to %d/%d." % [src.hp, src.max_hp])
+			hp_changed.emit()
 		CardData.CardType.DRAW:
 			_bury(src, card)
 			var d := src.draw_cards(2)
 			_note_draw(src, d)
-			_log("%s draws %d (无中生有)." % [src.display_name, d.size()])
+			_log_who(src, "draws %d (无中生有)." % d.size())
 		CardData.CardType.DISCARD:
 			_bury(src, card)
 			var removed := tgt.discard_random_from_hand()
 			if removed:
 				_note_discard(tgt, removed)
-				_log("%s loses %s (过河拆桥)." % [tgt.display_name, removed.short_label()])
+				_log_who(tgt, "loses %s (过河拆桥)." % removed.short_label())
 			else:
-				_log("%s has no cards to discard." % tgt.display_name)
+				_log_who(tgt, "has no cards to discard.")
 		CardData.CardType.DODGE:
 			_bury(src, card)
 		_:
@@ -273,10 +276,9 @@ func respond_dodge(use_dodge: bool) -> void:
 	_check_end()
 
 func _apply_damage(tgt: Combatant, amount: int) -> void:
-	tgt.hp -= amount
-	_log("%s takes %d damage (%d/%d)." % [tgt.display_name, amount, maxi(tgt.hp, 0), tgt.max_hp])
-	if tgt.hp <= 0:
-		tgt.hp = 0
+	tgt.hp = maxi(tgt.hp - amount, 0)
+	_log_who(tgt, "takes %d damage (%d/%d)." % [amount, tgt.hp, tgt.max_hp])
+	hp_changed.emit()
 
 func _check_end() -> void:
 	if phase == Phase.ENDED:
@@ -294,3 +296,24 @@ func _check_end() -> void:
 
 func _log(text: String) -> void:
 	log_message.emit(text)
+
+## "You draws" is wrong; everyone else keeps the third-person verb.
+func _log_who(who: Combatant, third: String) -> void:
+	_log("%s %s" % [who.display_name, _agree(who, third)])
+
+func _agree(who: Combatant, third: String) -> String:
+	if who == null or not who.is_player:
+		return third
+	var verbs := {
+		"draws": "draw",
+		"plays": "play",
+		"heals": "heal",
+		"loses": "lose",
+		"takes": "take",
+		"discards": "discard",
+		"has": "have",
+	}
+	for src in verbs:
+		if third.begins_with(src):
+			return verbs[src] + third.substr(src.length())
+	return third

@@ -135,6 +135,7 @@ func _start_fight() -> void:
 	ctrl.setup(p, e, RunManager.HAND_LIMIT_BASE)
 	ctrl.log_message.connect(_on_log)
 	ctrl.state_changed.connect(_refresh)
+	ctrl.hp_changed.connect(_sync_both_bars)
 	ctrl.card_played.connect(_on_card_played)
 	ctrl.cards_drawn.connect(_on_cards_drawn)
 	ctrl.card_discarded.connect(_on_card_discarded)
@@ -165,11 +166,10 @@ func _refresh() -> void:
 	if ctrl == null:
 		return
 	enemy_name_lbl.text = ctrl.enemy.display_name
-	_sync_hp(enemy_hp_clip, enemy_hp_lbl, ctrl.enemy.hp, ctrl.enemy.max_hp)
+	_sync_both_bars()
 	_align_tracking(false)
 	_sync_enemy_hand()
 	player_name_lbl.text = ctrl.player.display_name
-	_sync_hp(player_hp_clip, player_hp_lbl, ctrl.player.hp, ctrl.player.max_hp)
 	_align_tracking(true)
 	_sync_piles()
 	_sync_response_choice()
@@ -464,6 +464,12 @@ func _center_reveal() -> void:
 		return
 	reveal_group.pivot_offset = frame_size * 0.5
 	reveal_group.position = (reveal_layer.size - frame_size) * 0.5
+
+func _sync_both_bars() -> void:
+	if ctrl == null:
+		return
+	_sync_hp(enemy_hp_clip, enemy_hp_lbl, ctrl.enemy.hp, ctrl.enemy.max_hp)
+	_sync_hp(player_hp_clip, player_hp_lbl, ctrl.player.hp, ctrl.player.max_hp)
 
 func _sync_hp(clip: Control, lbl: Label, hp: int, max_hp: int) -> void:
 	var cap := maxi(max_hp, 1)

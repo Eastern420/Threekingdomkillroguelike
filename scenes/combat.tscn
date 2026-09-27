@@ -619,7 +619,20 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture_normal = ExtResource("4")
-ignore_texture_size = true
-stretch_mode = 5
 tooltip_text = "Take the hit (−HP)"
+
+[node name="HitArt" type="TextureRect" parent="ResponseOverlay/ChoicePanel/ChoiceRow/HitHost/HitButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 16.0
+offset_right = -18.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 5
