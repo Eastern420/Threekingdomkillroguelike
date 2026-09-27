@@ -1,24 +1,22 @@
-[gd_scene load_steps=11 format=3 uid="uid://bqcombat001"]
+[gd_scene load_steps=9 format=3 uid="uid://bqcombat001"]
 
 [ext_resource type="Script" path="res://scripts/combat_view.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/cards/dodge.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/cards/atk.png" id="3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
-content_margin_left = 10.0
-content_margin_top = 2.0
-content_margin_right = 10.0
-content_margin_bottom = 2.0
-bg_color = Color(0.1, 0.08, 0.06, 0.94)
+content_margin_left = 8.0
+content_margin_top = 1.0
+content_margin_right = 8.0
+content_margin_bottom = 1.0
+bg_color = Color(0.1, 0.09, 0.08, 0.94)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.9, 0.74, 0.34, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
+border_color = Color(0.86, 0.7, 0.34, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_frame"]
 bg_color = Color(0.06, 0.05, 0.04, 1)
@@ -34,81 +32,54 @@ corner_radius_bottom_left = 8
 shadow_color = Color(0, 0, 0, 0.55)
 shadow_size = 14
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_zone"]
-content_margin_left = 8.0
-content_margin_top = 6.0
-content_margin_right = 8.0
-content_margin_bottom = 6.0
-bg_color = Color(0.13, 0.12, 0.11, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.72, 0.58, 0.28, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dodge"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.08, 0.16, 0.12, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.35, 0.78, 0.48, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hit"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.2, 0.07, 0.07, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.86, 0.22, 0.18, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
-bg_color = Color(0.08, 0.08, 0.09, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.45, 0.38, 0.22, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_choice"]
-content_margin_left = 16.0
-content_margin_top = 8.0
-content_margin_right = 16.0
-content_margin_bottom = 8.0
-bg_color = Color(0.07, 0.08, 0.09, 0.96)
+content_margin_left = 20.0
+content_margin_top = 24.0
+content_margin_right = 20.0
+content_margin_bottom = 24.0
+bg_color = Color(0.07, 0.07, 0.08, 0.98)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.86, 0.7, 0.32, 1)
+border_color = Color(0.78, 0.64, 0.32, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_teal"]
+bg_color = Color(0.180392, 0.768627, 0.713726, 1)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_crimson"]
+bg_color = Color(0.768627, 0.117647, 0.227451, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_grey"]
+bg_color = Color(0.32, 0.32, 0.34, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
+bg_color = Color(0.12, 0.12, 0.13, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 0.58, 0.28, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="Combat" type="Control"]
 layout_mode = 3
@@ -139,7 +110,7 @@ offset_right = -24.0
 offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="EnemyPanel" type="VBoxContainer" parent="Root"]
 layout_mode = 2
@@ -154,18 +125,40 @@ text = "Enemy"
 layout_mode = 2
 text = "HP"
 
-[node name="EnemyHand" type="HBoxContainer" parent="Root/EnemyPanel"]
-custom_minimum_size = Vector2(0, 86)
+[node name="EnemyRow" type="HBoxContainer" parent="Root/EnemyPanel"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="Backs" type="HBoxContainer" parent="Root/EnemyPanel/EnemyHand"]
+[node name="EnemyDraw" type="VBoxContainer" parent="Root/EnemyPanel/EnemyRow"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="EnemyDrawBack" type="Control" parent="Root/EnemyPanel/EnemyRow/EnemyDraw"]
+custom_minimum_size = Vector2(64, 84)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="EnemyDrawCount" type="Label" parent="Root/EnemyPanel/EnemyRow/EnemyDraw"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "0"
+horizontal_alignment = 1
+
+[node name="EnemyHand" type="HBoxContainer" parent="Root/EnemyPanel/EnemyRow"]
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Backs" type="HBoxContainer" parent="Root/EnemyPanel/EnemyRow/EnemyHand"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = -40
 
-[node name="CountBadge" type="PanelContainer" parent="Root/EnemyPanel/EnemyHand"]
+[node name="CountBadge" type="PanelContainer" parent="Root/EnemyPanel/EnemyRow/EnemyHand"]
 custom_minimum_size = Vector2(44, 32)
 layout_mode = 2
 size_flags_vertical = 4
@@ -173,7 +166,7 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
 tooltip_text = "Opponent hand"
 
-[node name="CountLabel" type="Label" parent="Root/EnemyPanel/EnemyHand/CountBadge"]
+[node name="CountLabel" type="Label" parent="Root/EnemyPanel/EnemyRow/EnemyHand/CountBadge"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.98, 0.94, 0.84, 1)
@@ -182,199 +175,56 @@ text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="EnemyDiscard" type="VBoxContainer" parent="Root/EnemyPanel/EnemyRow"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="EnemyDiscardSlot" type="Panel" parent="Root/EnemyPanel/EnemyRow/EnemyDiscard"]
+custom_minimum_size = Vector2(52, 72)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="EnemyDiscardArt" type="TextureRect" parent="Root/EnemyPanel/EnemyRow/EnemyDiscard/EnemyDiscardSlot"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EnemyDiscardCount" type="Label" parent="Root/EnemyPanel/EnemyRow/EnemyDiscard"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "0"
+horizontal_alignment = 1
+
 [node name="PhaseLabel" type="Label" parent="Root"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Phase"
 horizontal_alignment = 1
 
-[node name="Table" type="HBoxContainer" parent="Root"]
+[node name="LogPanel" type="PanelContainer" parent="Root"]
+custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 10
 
-[node name="DrawZone" type="PanelContainer" parent="Root/Table"]
-custom_minimum_size = Vector2(168, 132)
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_zone")
-
-[node name="DrawInner" type="VBoxContainer" parent="Root/Table/DrawZone"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="DrawTitle" type="Label" parent="Root/Table/DrawZone/DrawInner"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.84, 0.5, 1)
-theme_override_font_sizes/font_size = 18
-text = "Draw"
-horizontal_alignment = 1
-
-[node name="DrawPiles" type="HBoxContainer" parent="Root/Table/DrawZone/DrawInner"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="PlayerDraw" type="VBoxContainer" parent="Root/Table/DrawZone/DrawInner/DrawPiles"]
-layout_mode = 2
-theme_override_constants/separation = 2
-alignment = 1
-
-[node name="PlayerDrawBack" type="Control" parent="Root/Table/DrawZone/DrawInner/DrawPiles/PlayerDraw"]
-custom_minimum_size = Vector2(52, 72)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="PlayerDrawCount" type="Label" parent="Root/Table/DrawZone/DrawInner/DrawPiles/PlayerDraw"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "0"
-horizontal_alignment = 1
-
-[node name="PlayerDrawName" type="Label" parent="Root/Table/DrawZone/DrawInner/DrawPiles/PlayerDraw"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 13
-text = "You"
-horizontal_alignment = 1
-
-[node name="EnemyDraw" type="VBoxContainer" parent="Root/Table/DrawZone/DrawInner/DrawPiles"]
-layout_mode = 2
-theme_override_constants/separation = 2
-alignment = 1
-
-[node name="EnemyDrawBack" type="Control" parent="Root/Table/DrawZone/DrawInner/DrawPiles/EnemyDraw"]
-custom_minimum_size = Vector2(52, 72)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="EnemyDrawCount" type="Label" parent="Root/Table/DrawZone/DrawInner/DrawPiles/EnemyDraw"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "0"
-horizontal_alignment = 1
-
-[node name="EnemyDrawName" type="Label" parent="Root/Table/DrawZone/DrawInner/DrawPiles/EnemyDraw"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 13
-text = "Foe"
-horizontal_alignment = 1
-
-[node name="LogPanel" type="PanelContainer" parent="Root/Table"]
-custom_minimum_size = Vector2(0, 120)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="LogText" type="Label" parent="Root/Table/LogPanel"]
+[node name="LogText" type="Label" parent="Root/LogPanel"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Combat log…"
 autowrap_mode = 3
 vertical_alignment = 1
-
-[node name="DiscardZone" type="PanelContainer" parent="Root/Table"]
-custom_minimum_size = Vector2(176, 132)
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_zone")
-
-[node name="DiscardInner" type="VBoxContainer" parent="Root/Table/DiscardZone"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="DiscardTitle" type="Label" parent="Root/Table/DiscardZone/DiscardInner"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.84, 0.5, 1)
-theme_override_font_sizes/font_size = 18
-text = "Discard"
-horizontal_alignment = 1
-
-[node name="DiscardPiles" type="HBoxContainer" parent="Root/Table/DiscardZone/DiscardInner"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="PlayerDiscard" type="VBoxContainer" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles"]
-layout_mode = 2
-theme_override_constants/separation = 2
-alignment = 1
-
-[node name="PlayerDiscardSlot" type="Panel" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/PlayerDiscard"]
-custom_minimum_size = Vector2(56, 78)
-layout_mode = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
-
-[node name="PlayerDiscardArt" type="TextureRect" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/PlayerDiscard/PlayerDiscardSlot"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = -2.0
-offset_bottom = -2.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="PlayerDiscardCount" type="Label" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/PlayerDiscard"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "0"
-horizontal_alignment = 1
-
-[node name="PlayerDiscardName" type="Label" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/PlayerDiscard"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 13
-text = "You"
-horizontal_alignment = 1
-
-[node name="EnemyDiscard" type="VBoxContainer" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles"]
-layout_mode = 2
-theme_override_constants/separation = 2
-alignment = 1
-
-[node name="EnemyDiscardSlot" type="Panel" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/EnemyDiscard"]
-custom_minimum_size = Vector2(56, 78)
-layout_mode = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
-
-[node name="EnemyDiscardArt" type="TextureRect" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/EnemyDiscard/EnemyDiscardSlot"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = -2.0
-offset_bottom = -2.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="EnemyDiscardCount" type="Label" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/EnemyDiscard"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "0"
-horizontal_alignment = 1
-
-[node name="EnemyDiscardName" type="Label" parent="Root/Table/DiscardZone/DiscardInner/DiscardPiles/EnemyDiscard"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 13
-text = "Foe"
-horizontal_alignment = 1
 
 [node name="DiscardHint" type="Label" parent="Root"]
 visible = false
@@ -395,85 +245,106 @@ text = "You"
 layout_mode = 2
 text = "HP"
 
-[node name="HandArea" type="ScrollContainer" parent="Root"]
+[node name="HandRow" type="HBoxContainer" parent="Root"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="PlayerDraw" type="Control" parent="Root/HandRow"]
+custom_minimum_size = Vector2(96, 118)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="PlayerDrawBack" type="Control" parent="Root/HandRow/PlayerDraw"]
+custom_minimum_size = Vector2(84, 108)
+layout_mode = 0
+offset_right = 84.0
+offset_bottom = 108.0
+mouse_filter = 2
+
+[node name="PlayerDrawBadge" type="PanelContainer" parent="Root/HandRow/PlayerDraw"]
+z_index = 2
+custom_minimum_size = Vector2(36, 28)
+layout_mode = 0
+offset_left = 52.0
+offset_top = -2.0
+offset_right = 96.0
+offset_bottom = 28.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
+tooltip_text = "Draw pile"
+
+[node name="PlayerDrawCount" type="Label" parent="Root/HandRow/PlayerDraw/PlayerDrawBadge"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.98, 0.94, 0.84, 1)
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HandArea" type="ScrollContainer" parent="Root/HandRow"]
 custom_minimum_size = Vector2(0, 142)
 layout_mode = 2
-size_flags_vertical = 0
+size_flags_horizontal = 3
+size_flags_vertical = 4
 horizontal_scroll_mode = 1
 vertical_scroll_mode = 0
 
-[node name="HandBox" type="HBoxContainer" parent="Root/HandArea"]
+[node name="HandBox" type="HBoxContainer" parent="Root/HandRow/HandArea"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="ResponseChoice" type="PanelContainer" parent="Root"]
+[node name="PlayerDiscard" type="Control" parent="Root/HandRow"]
+custom_minimum_size = Vector2(96, 118)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="PlayerDiscardSlot" type="Panel" parent="Root/HandRow/PlayerDiscard"]
+custom_minimum_size = Vector2(72, 100)
+layout_mode = 0
+offset_right = 72.0
+offset_bottom = 100.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="PlayerDiscardArt" type="TextureRect" parent="Root/HandRow/PlayerDiscard/PlayerDiscardSlot"]
 visible = false
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_choice")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
 
-[node name="ResponseInner" type="VBoxContainer" parent="Root/ResponseChoice"]
-layout_mode = 2
-theme_override_constants/separation = 6
+[node name="PlayerDiscardBadge" type="PanelContainer" parent="Root/HandRow/PlayerDiscard"]
+z_index = 2
+custom_minimum_size = Vector2(36, 28)
+layout_mode = 0
+offset_left = 48.0
+offset_top = -2.0
+offset_right = 92.0
+offset_bottom = 28.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
+tooltip_text = "Discard pile"
 
-[node name="Prompt" type="Label" parent="Root/ResponseChoice/ResponseInner"]
+[node name="PlayerDiscardCount" type="Label" parent="Root/HandRow/PlayerDiscard/PlayerDiscardBadge"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.96, 0.88, 0.6, 1)
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.98, 0.94, 0.84, 1)
 theme_override_font_sizes/font_size = 16
-text = "Respond to the attack"
+text = "0"
 horizontal_alignment = 1
-
-[node name="ChoiceBox" type="HBoxContainer" parent="Root/ResponseChoice/ResponseInner"]
-layout_mode = 2
-theme_override_constants/separation = 36
-alignment = 1
-
-[node name="DodgeCol" type="VBoxContainer" parent="Root/ResponseChoice/ResponseInner/ChoiceBox"]
-layout_mode = 2
-theme_override_constants/separation = 4
-alignment = 1
-
-[node name="DodgeFrame" type="PanelContainer" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/DodgeCol"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dodge")
-
-[node name="DodgeButton" type="TextureButton" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/DodgeCol/DodgeFrame"]
-custom_minimum_size = Vector2(108, 150)
-layout_mode = 2
-texture_normal = ExtResource("2")
-ignore_texture_size = true
-stretch_mode = 6
-
-[node name="DodgeCaption" type="Label" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/DodgeCol"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.95, 0.78, 1)
-theme_override_font_sizes/font_size = 18
-text = "Dodge"
-horizontal_alignment = 1
-
-[node name="HitCol" type="VBoxContainer" parent="Root/ResponseChoice/ResponseInner/ChoiceBox"]
-layout_mode = 2
-theme_override_constants/separation = 4
-alignment = 1
-
-[node name="HitFrame" type="PanelContainer" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/HitCol"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_hit")
-
-[node name="HitButton" type="TextureButton" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/HitCol/HitFrame"]
-custom_minimum_size = Vector2(108, 150)
-layout_mode = 2
-texture_normal = ExtResource("3")
-ignore_texture_size = true
-stretch_mode = 6
-
-[node name="HitCaption" type="Label" parent="Root/ResponseChoice/ResponseInner/ChoiceBox/HitCol"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.72, 0.66, 1)
-theme_override_font_sizes/font_size = 18
-text = "Take the Hit"
-horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Actions" type="HBoxContainer" parent="Root"]
 layout_mode = 2
@@ -532,3 +403,60 @@ theme_override_font_sizes/font_size = 15
 text = "Opponent plays"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ResponseOverlay" type="Control" parent="."]
+visible = false
+z_index = 30
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Dimmer" type="ColorRect" parent="ResponseOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.45)
+
+[node name="ChoicePanel" type="PanelContainer" parent="ResponseOverlay"]
+custom_minimum_size = Vector2(800, 240)
+layout_mode = 0
+offset_right = 800.0
+offset_bottom = 240.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_choice")
+
+[node name="ChoiceRow" type="HBoxContainer" parent="ResponseOverlay/ChoicePanel"]
+layout_mode = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="DodgeButton" type="Button" parent="ResponseOverlay/ChoicePanel/ChoiceRow"]
+custom_minimum_size = Vector2(360, 192)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.78, 0.78, 0.78, 1)
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxFlat_teal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_teal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_teal")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_grey")
+theme_override_styles/focus = SubResource("StyleBoxFlat_teal")
+text = "Play DODGE"
+
+[node name="HitButton" type="Button" parent="ResponseOverlay/ChoicePanel/ChoiceRow"]
+custom_minimum_size = Vector2(360, 192)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxFlat_crimson")
+theme_override_styles/hover = SubResource("StyleBoxFlat_crimson")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_crimson")
+theme_override_styles/focus = SubResource("StyleBoxFlat_crimson")
+text = "Take the Hit"

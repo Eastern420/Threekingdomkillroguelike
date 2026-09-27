@@ -235,20 +235,18 @@ func _resolve_card(card: CardData, src: Combatant, tgt: Combatant, from_player: 
 func _start_attack(src: Combatant, tgt: Combatant, from_player: bool) -> void:
 	pending_attack_from_player = from_player
 	if tgt.is_player:
-		if tgt.find_first_of_type(CardData.CardType.DODGE) >= 0:
-			phase = Phase.AWAIT_DODGE
-			_log("殺 incoming — play 閃 or take the hit.")
-			awaiting_dodge.emit(from_player)
-			state_changed.emit()
-			return
-		_apply_damage(tgt, 1)
+		phase = Phase.AWAIT_DODGE
+		_log("殺 incoming — play 閃 or take the hit.")
+		awaiting_dodge.emit(from_player)
+		state_changed.emit()
+		return
 	else:
 		if CombatAI.should_dodge(tgt):
 			var di := tgt.find_first_of_type(CardData.CardType.DODGE)
 			var dodge_card := tgt.hand[di]
 			tgt.hand.remove_at(di)
-			_bury(tgt, dodge_card)
 			card_played.emit(dodge_card, false)
+			_bury(tgt, dodge_card)
 			_log("%s plays 閃 — cancelled!" % tgt.display_name)
 		else:
 			_apply_damage(tgt, 1)
@@ -263,8 +261,8 @@ func respond_dodge(use_dodge: bool) -> void:
 		if di >= 0:
 			var dodge_card := tgt.hand[di]
 			tgt.hand.remove_at(di)
-			_bury(tgt, dodge_card)
 			card_played.emit(dodge_card, true)
+			_bury(tgt, dodge_card)
 			_log("You play 閃 — cancelled!")
 		else:
 			_apply_damage(tgt, 1)
