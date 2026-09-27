@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/card_data.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://ca432086ce2806f0c" path="res://assets/cards/heal.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "tao"
+name_zh = "桃"
+name_en = "HEAL"
+description = "Restore 1 HP (cannot exceed max HP)."
+type = 2
+color = Color(0.2, 0.65, 0.3, 1)
+art = ExtResource("2")

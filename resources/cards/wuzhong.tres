@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/card_data.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c46d97ee8514e8ad8" path="res://assets/cards/steal.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "wuzhong"
+name_zh = "无中生有"
+name_en = "DRAW"
+description = "Draw 2 cards from your deck."
+type = 4
+color = Color(0.55, 0.25, 0.65, 1)
+art = ExtResource("2")
