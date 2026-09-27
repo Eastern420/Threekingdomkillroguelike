@@ -84,6 +84,7 @@ var _reveal_queue: Array[Dictionary] = []
 var _reveal_playing: bool = false
 var _reveal_started_msec: int = 0
 var _reveal_hold_sent: bool = false
+var _reveal_finish_sent: bool = false
 var _reveal_tween: Tween
 var _reveal_token: int = 0
 var _reveal_serial: int = 0
@@ -195,7 +196,9 @@ func _refresh() -> void:
 	if discard_mode:
 		discard_hint.text = "Click cards to discard until hand ≤ %d" % ctrl.hand_limit
 
-	_rebuild_hand()
+	# Rebuild after the card button's pressed signal returns. free()/remove_child
+	# on that button while it is still emitting locks the object and stalls the frame.
+	call_deferred("_rebuild_hand")
 	call_deferred("_layout_hp_bars")
 	call_deferred("_layout_hand")
 
@@ -247,6 +250,10 @@ func _rebuild_hand() -> void:
 		_player_nodes.append(btn)
 
 func _on_card_pressed(index: int) -> void:
+	if index >= 0 and index < hand_box.get_child_count():
+		var node := hand_box.get_child(index)
+		if node is BaseButton:
+			(node as BaseButton).disabled = true
 	if discard_mode:
 		ctrl.player_discard_at(index)
 		return
@@ -506,6 +513,7 @@ func _on_card_played(card: CardData, by_player: bool) -> void:
 func _play_next_reveal() -> void:
 	if _reveal_queue.is_empty():
 		_reveal_playing = false
+		_reveal_finish_sent = false
 		_reveal_token = 0
 		reveal_group.visible = false
 		reveal_group.scale = Vector2.ONE
@@ -541,6 +549,7 @@ func _play_next_reveal() -> void:
 	if _reveal_tween != null and _reveal_tween.is_valid():
 		_reveal_tween.kill()
 	_reveal_hold_sent = false
+	_reveal_finish_sent = false
 	_reveal_started_msec = Time.get_ticks_msec()
 	_reveal_tween = create_tween()
 	_reveal_tween.set_parallel(true)
@@ -551,11 +560,14 @@ func _play_next_reveal() -> void:
 	_reveal_tween.tween_property(reveal_group, "scale", Vector2.ONE, ORIGIN_FLY_SEC) \
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	_reveal_tween.tween_property(reveal_group, "modulate:a", 1.0, 0.05)
-	_reveal_tween.chain().tween_interval(REVEAL_HOLD_SEC)
-	_reveal_tween.parallel().tween_property(origin_trail, "modulate:a", 0.0, 0.2)
-	_reveal_tween.chain().tween_callback(_on_reveal_hold_ended)
+	# Flight above is parallel. Everything after it is strictly ordered so the
+	# finished step cannot be skipped or kill this tween from inside itself.
+	_reveal_tween.set_parallel(false)
+	_reveal_tween.tween_interval(REVEAL_HOLD_SEC)
+	_reveal_tween.tween_callback(_on_reveal_hold_ended)
+	_reveal_tween.tween_property(origin_trail, "modulate:a", 0.0, 0.15)
 	_reveal_tween.tween_property(reveal_group, "modulate:a", 0.0, REVEAL_OUT_SEC)
-	_reveal_tween.tween_callback(_on_reveal_finished)
+	_reveal_tween.finished.connect(_on_reveal_finished, CONNECT_ONE_SHOT)
 
 func _reveal_arc_step(t: float, start: Vector2, control: Vector2, end: Vector2, frame_size: Vector2) -> void:
 	if not is_instance_valid(reveal_group):
@@ -588,7 +600,11 @@ func _on_reveal_hold_ended() -> void:
 	_flush_discard_flights(_reveal_token)
 
 func _on_reveal_finished() -> void:
-	_play_next_reveal()
+	if _reveal_finish_sent:
+		return
+	_reveal_finish_sent = true
+	# Defer so a queued follow-up (enemy 閃) does not kill this tween mid-callback.
+	call_deferred("_play_next_reveal")
 
 func _install_draw_stack() -> void:
 	_clear_children(draw_stack)
