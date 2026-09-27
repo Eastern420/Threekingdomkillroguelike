@@ -45,10 +45,11 @@ const UI_BACK := "res://assets/ui/card_back.png"
 @onready var player_hp_clip: Control = $PlayerHPWrap/PlayerHPBar/FillClip
 @onready var player_hp_lbl: Label = $PlayerHPWrap/PlayerHP
 @onready var phase_lbl: Label = $Root/PhaseLabel
-@onready var log_lbl: Label = $Root/LogPanel/LogText
+@onready var log_lbl: Label = $Root/LogPanel/LogClip/LogText
 @onready var hand_area: ScrollContainer = $Root/HandRow/HandArea
 @onready var hand_box: HBoxContainer = $Root/HandRow/HandArea/HandBox
-@onready var btn_end: Button = $Root/Actions/EndTurn
+@onready var root_box: Control = $Root
+@onready var btn_end: Button = $EndTurn
 @onready var discard_hint: Label = $Root/DiscardHint
 @onready var response_overlay: Control = $ResponseOverlay
 @onready var choice_panel: Control = $ResponseOverlay/ChoicePanel
@@ -116,6 +117,7 @@ func _ready() -> void:
 	_bind_choice_buttons()
 	_install_draw_stack()
 	resized.connect(_layout_hud)
+	root_box.item_rect_changed.connect(_layout_hp_bars)
 	_configure_reveal_layout()
 	call_deferred("_layout_hud")
 	_start_fight()
@@ -189,8 +191,11 @@ func _refresh() -> void:
 	var whose := "Your turn" if ctrl.player_turn else "%s's turn" % ctrl.enemy.display_name
 	phase_lbl.text = "%s — %s" % [whose, phase_names.get(ctrl.phase, "?")]
 
-	btn_end.visible = ctrl.phase == CombatController.Phase.PLAY and ctrl.player_turn
-	btn_end.disabled = not btn_end.visible
+	var can_end := ctrl.phase == CombatController.Phase.PLAY and ctrl.player_turn
+	btn_end.visible = can_end
+	btn_end.disabled = not can_end
+	if can_end:
+		btn_end.mouse_filter = Control.MOUSE_FILTER_STOP
 	discard_mode = ctrl.phase == CombatController.Phase.DISCARD and ctrl.player_turn
 	discard_hint.visible = discard_mode
 	if discard_mode:
@@ -201,6 +206,7 @@ func _refresh() -> void:
 	call_deferred("_rebuild_hand")
 	call_deferred("_layout_hp_bars")
 	call_deferred("_layout_hand")
+	call_deferred("_layout_end_turn")
 
 func _rebuild_hand() -> void:
 	_clear_children(hand_box)
@@ -358,6 +364,19 @@ func _layout_hud() -> void:
 	_center_reveal()
 	_layout_hp_bars()
 	_layout_hand()
+	_layout_end_turn()
+
+func _layout_end_turn() -> void:
+	# Pinned to the viewport, not the column. A tall combat log used to grow
+	# Root past 720px and slide this button off the bottom.
+	if btn_end == null:
+		return
+	var btn_size := btn_end.custom_minimum_size
+	if btn_size.y < 1.0:
+		btn_size = Vector2(160, 48)
+	btn_end.size = btn_size
+	btn_end.position = Vector2((size.x - btn_size.x) * 0.5, size.y - 16.0 - btn_size.y)
+	btn_end.z_index = 70
 
 func _layout_hand() -> void:
 	if hand_area == null or hand_box == null:
