@@ -13,6 +13,8 @@ const REVEAL_OUT_SEC := 0.2
 ## Spec: hand slot → center in 0.15s. Hold and fade still run after arrival.
 const ORIGIN_FLY_SEC := 0.15
 const ORIGIN_ARC := 36.0
+## Fly + hold + fade, plus a margin. If the tween never finishes, combat must still continue.
+const REVEAL_MAX_SEC := 2.6
 const HP_FILL_FULL := Vector2(268, 16)
 const TRAIL_PLAYER := Color(0.95, 0.78, 0.34, 0.95)
 const TRAIL_ENEMY := Color(0.86, 0.16, 0.24, 0.95)
@@ -80,6 +82,8 @@ const AI_STEP_DELAY := 0.55
 var discard_mode: bool = false
 var _reveal_queue: Array[Dictionary] = []
 var _reveal_playing: bool = false
+var _reveal_started_msec: int = 0
+var _reveal_hold_sent: bool = false
 var _reveal_tween: Tween
 var _reveal_token: int = 0
 var _reveal_serial: int = 0
@@ -148,6 +152,7 @@ func _start_fight() -> void:
 func _process(delta: float) -> void:
 	if ctrl == null or ctrl.phase == CombatController.Phase.ENDED:
 		return
+	_watch_reveal()
 	if _reveal_playing:
 		return
 	if ctrl.phase == CombatController.Phase.PLAY and not ctrl.player_turn:
@@ -254,13 +259,13 @@ func _on_await_dodge(_attacker_is_player: bool) -> void:
 	_sync_response_choice()
 
 func _on_dodge() -> void:
-	if dodge_btn.disabled:
+	if ctrl == null or dodge_btn.disabled or ctrl.phase != CombatController.Phase.AWAIT_DODGE:
 		return
-	response_overlay.visible = false
 	ctrl.respond_dodge(true)
 
 func _on_take_hit() -> void:
-	response_overlay.visible = false
+	if ctrl == null or ctrl.phase != CombatController.Phase.AWAIT_DODGE:
+		return
 	ctrl.respond_dodge(false)
 
 func _sync_response_choice() -> void:
@@ -278,6 +283,10 @@ func _sync_response_choice() -> void:
 		return
 	var can_dodge := ctrl.player.find_first_of_type(CardData.CardType.DODGE) >= 0
 	dodge_btn.disabled = not can_dodge
+	hit_btn.disabled = false
+	hit_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	if not dodge_btn.disabled:
+		dodge_btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	if dodge_btn.disabled:
 		_dodge_pointer = false
 		_dodge_focus = false
@@ -531,6 +540,8 @@ func _play_next_reveal() -> void:
 	origin_trail.points = PackedVector2Array([start_c, start_c])
 	if _reveal_tween != null and _reveal_tween.is_valid():
 		_reveal_tween.kill()
+	_reveal_hold_sent = false
+	_reveal_started_msec = Time.get_ticks_msec()
 	_reveal_tween = create_tween()
 	_reveal_tween.set_parallel(true)
 	_reveal_tween.tween_method(
@@ -560,7 +571,20 @@ func _reveal_pos_for_center(global_center: Vector2) -> Vector2:
 		local_center = reveal_layer.get_global_transform().affine_inverse() * global_center
 	return local_center - reveal_group.size * 0.5
 
+func _watch_reveal() -> void:
+	if not _reveal_playing:
+		return
+	if Time.get_ticks_msec() - _reveal_started_msec < int(REVEAL_MAX_SEC * 1000.0):
+		return
+	if _reveal_tween != null and _reveal_tween.is_valid():
+		_reveal_tween.kill()
+	_on_reveal_hold_ended()
+	_on_reveal_finished()
+
 func _on_reveal_hold_ended() -> void:
+	if _reveal_hold_sent:
+		return
+	_reveal_hold_sent = true
 	_flush_discard_flights(_reveal_token)
 
 func _on_reveal_finished() -> void:
@@ -926,4 +950,4 @@ func _clear_children(node: Node) -> void:
 		return
 	for c in node.get_children():
 		node.remove_child(c)
-		c.free()
+		c.queue_free()

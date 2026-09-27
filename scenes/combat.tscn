@@ -487,7 +487,7 @@ vertical_alignment = 1
 
 [node name="ResponseOverlay" type="Control" parent="."]
 visible = false
-z_index = 30
+z_index = 60
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
