@@ -1,11 +1,14 @@
-[gd_scene load_steps=13 format=3 uid="uid://bqcombat001"]
+[gd_scene load_steps=14 format=3 uid="uid://bqcombat001"]
 
 [ext_resource type="Script" path="res://scripts/combat_view.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/ui/choice_panel_bg.png" id="2"]
 [ext_resource type="Texture2D" path="res://assets/cards/dodge.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/ui/choice_lose_hp.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/choice_minus_hp.png" id="4"]
 [ext_resource type="Texture2D" path="res://assets/ui/pile_draw_marker.png" id="5"]
 [ext_resource type="Texture2D" path="res://assets/ui/pile_discard_marker.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/ui/hp_bar_frame.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/ui/hp_bar_fill.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/ui/hp_bar_fill_enemy.png" id="9"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
 content_margin_left = 8.0
@@ -48,29 +51,6 @@ corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
-content_margin_left = 3.0
-content_margin_top = 3.0
-content_margin_right = 3.0
-content_margin_bottom = 3.0
-bg_color = Color(0.1, 0.09, 0.08, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.78, 0.64, 0.32, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fill"]
-bg_color = Color(0.2, 0.7, 0.38, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dodge_tray"]
 bg_color = Color(0.07, 0.1, 0.12, 0.96)
@@ -124,27 +104,47 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "Enemy"
 
-[node name="EnemyHPWrap" type="Control" parent="Root/EnemyPanel"]
-custom_minimum_size = Vector2(320, 26)
+[node name="EnemyHPSlot" type="Control" parent="Root/EnemyPanel"]
+custom_minimum_size = Vector2(360, 32)
 layout_mode = 2
 size_flags_horizontal = 0
 mouse_filter = 2
 
-[node name="EnemyHPBar" type="ProgressBar" parent="Root/EnemyPanel/EnemyHPWrap"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="EnemyHPWrap" type="HBoxContainer" parent="."]
+z_index = 6
+layout_mode = 0
+offset_left = 24.0
+offset_top = 50.0
+offset_right = 380.0
+offset_bottom = 78.0
 mouse_filter = 2
-theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
-theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
-max_value = 4.0
-value = 4.0
-show_percentage = false
+theme_override_constants/separation = 8
 
-[node name="EnemyHP" type="Label" parent="Root/EnemyPanel/EnemyHPWrap"]
+[node name="EnemyHPBar" type="Control" parent="EnemyHPWrap"]
+custom_minimum_size = Vector2(280, 28)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="FillClip" type="Control" parent="EnemyHPWrap/EnemyHPBar"]
+z_index = 1
+clip_contents = true
+layout_mode = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 274.0
+offset_bottom = 22.0
+mouse_filter = 2
+
+[node name="Fill" type="TextureRect" parent="EnemyHPWrap/EnemyHPBar/FillClip"]
+layout_mode = 0
+offset_right = 268.0
+offset_bottom = 16.0
+mouse_filter = 2
+texture = ExtResource("9")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Frame" type="TextureRect" parent="EnemyHPWrap/EnemyHPBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -152,12 +152,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.98, 0.96, 0.92, 1)
-theme_override_colors/font_outline_color = Color(0.05, 0.04, 0.03, 0.92)
-theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 14
+texture = ExtResource("7")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EnemyHP" type="Label" parent="EnemyHPWrap"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.98, 0.94, 0.84, 1)
+theme_override_font_sizes/font_size = 16
 text = "4 / 4"
-horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="EnemyRow" type="HBoxContainer" parent="Root/EnemyPanel"]
@@ -227,27 +232,47 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "You"
 
-[node name="PlayerHPWrap" type="Control" parent="Root/PlayerPanel"]
-custom_minimum_size = Vector2(320, 26)
+[node name="PlayerHPSlot" type="Control" parent="Root/PlayerPanel"]
+custom_minimum_size = Vector2(360, 32)
 layout_mode = 2
 size_flags_horizontal = 0
 mouse_filter = 2
 
-[node name="PlayerHPBar" type="ProgressBar" parent="Root/PlayerPanel/PlayerHPWrap"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="PlayerHPWrap" type="HBoxContainer" parent="."]
+z_index = 6
+layout_mode = 0
+offset_left = 24.0
+offset_top = 620.0
+offset_right = 384.0
+offset_bottom = 648.0
 mouse_filter = 2
-theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
-theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
-max_value = 4.0
-value = 4.0
-show_percentage = false
+theme_override_constants/separation = 8
 
-[node name="PlayerHP" type="Label" parent="Root/PlayerPanel/PlayerHPWrap"]
+[node name="PlayerHPBar" type="Control" parent="PlayerHPWrap"]
+custom_minimum_size = Vector2(280, 28)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="FillClip" type="Control" parent="PlayerHPWrap/PlayerHPBar"]
+z_index = 1
+clip_contents = true
+layout_mode = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 274.0
+offset_bottom = 22.0
+mouse_filter = 2
+
+[node name="Fill" type="TextureRect" parent="PlayerHPWrap/PlayerHPBar/FillClip"]
+layout_mode = 0
+offset_right = 268.0
+offset_bottom = 16.0
+mouse_filter = 2
+texture = ExtResource("8")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Frame" type="TextureRect" parent="PlayerHPWrap/PlayerHPBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -255,12 +280,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.98, 0.96, 0.92, 1)
-theme_override_colors/font_outline_color = Color(0.05, 0.04, 0.03, 0.92)
-theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 14
+texture = ExtResource("7")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayerHP" type="Label" parent="PlayerHPWrap"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.98, 0.94, 0.84, 1)
+theme_override_font_sizes/font_size = 16
 text = "4 / 4"
-horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="HandRow" type="HBoxContainer" parent="Root"]
@@ -420,6 +450,13 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+[node name="OriginTrail" type="Line2D" parent="PlayReveal"]
+width = 8.0
+default_color = Color(0.93, 0.76, 0.34, 0.92)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
 [node name="RevealGroup" type="Control" parent="PlayReveal"]
 visible = false
 layout_mode = 0
@@ -535,14 +572,30 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_dodge_tray")
 
 [node name="DodgeCard" type="TextureRect" parent="ResponseOverlay/ChoicePanel/ChoiceRow/DodgeHost/DodgeButton"]
 layout_mode = 0
-offset_left = 117.0
-offset_top = 8.0
-offset_right = 243.0
-offset_bottom = 184.0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 136.0
+offset_bottom = 180.0
 mouse_filter = 2
 texture = ExtResource("3")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="DodgeCaption" type="Label" parent="ResponseOverlay/ChoicePanel/ChoiceRow/DodgeHost/DodgeButton"]
+layout_mode = 0
+offset_left = 148.0
+offset_top = 24.0
+offset_right = 344.0
+offset_bottom = 168.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.98, 0.94, 0.84, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.08, 0.1, 0.9)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 28
+text = "Play
+DODGE"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="HitHost" type="Control" parent="ResponseOverlay/ChoicePanel/ChoiceRow"]
 custom_minimum_size = Vector2(360, 192)

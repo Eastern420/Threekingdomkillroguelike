@@ -30,3 +30,19 @@ Generated assets are authored for a 16:9 combat HUD and use the existing dark ch
 ## Opponent (optional same pass)
 - Opponent draw not required if shared/no enemy deck UI; if enemy hand grows from draws, fly from a small top-center offscreen or from player deck if shared rules.
 - **This prototype uses player deck only; opponent hand size changes without separate enemy deck pile unless Engineering adds one.**
+
+### HP bars
+- Replace numeric-only HP with bar under each nameplate.
+- Player: above hand / under "You" — bar 200×18 (scaled), fill = current/max.
+- Opponent: under "山賊" name — same size.
+- Still show small "3/3" text to the right of the bar for precision.
+- Frame: hp_bar_frame.png; fill: hp_bar_fill.png clipped by ratio.
+
+### Choice update
+- Dodge button: use face of `res://assets/cards/dodge.png` (or assets/cards/dodge.png) as the button art / left icon, not choice_dodge-only. choice_dodge.png can be the chrome frame OR Engineering composites dodge card scaled into left half of 360×192 with "Play DODGE" label.
+- Take Hit: use choice_minus_hp.png / choice_take_hit.png with clear -HP icon.
+
+### Center reveal origin
+- Player play: tween from played hand-slot position → center (0.15s).
+- Opponent play: tween from opponent hand-stack position → center (0.15s).
+- Optional thin colored trail: player gold, opponent vermillion, so origin is obvious.

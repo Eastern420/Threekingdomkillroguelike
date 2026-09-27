@@ -10,8 +10,12 @@ const FRAME_BORDER := 6.0
 const REVEAL_HOLD_SEC := 0.8
 const REVEAL_OUT_SEC := 0.2
 ## Flight from the playing hand into the gold center frame. Hold/fade run after arrival.
-const ORIGIN_FLY_SEC := 0.36
-const ORIGIN_ARC := 64.0
+## Spec: hand slot → center in 0.15s. Hold and fade still run after arrival.
+const ORIGIN_FLY_SEC := 0.15
+const ORIGIN_ARC := 36.0
+const HP_FILL_FULL := Vector2(268, 16)
+const TRAIL_PLAYER := Color(0.95, 0.78, 0.34, 0.95)
+const TRAIL_ENEMY := Color(0.86, 0.16, 0.24, 0.95)
 const LABEL_H := 22.0
 const LABEL_GAP := 8.0
 const DRAW_PILE_SIZE := Vector2(72, 100)
@@ -27,13 +31,17 @@ const CHOICE_BTN := Vector2(360, 192)
 const UI_BACK := "res://assets/ui/card_back.png"
 
 @onready var enemy_name_lbl: Label = $Root/EnemyPanel/EnemyName
-@onready var enemy_hp_bar: ProgressBar = $Root/EnemyPanel/EnemyHPWrap/EnemyHPBar
-@onready var enemy_hp_lbl: Label = $Root/EnemyPanel/EnemyHPWrap/EnemyHP
+@onready var enemy_hp_slot: Control = $Root/EnemyPanel/EnemyHPSlot
+@onready var enemy_hp_wrap: Control = $EnemyHPWrap
+@onready var enemy_hp_clip: Control = $EnemyHPWrap/EnemyHPBar/FillClip
+@onready var enemy_hp_lbl: Label = $EnemyHPWrap/EnemyHP
 @onready var enemy_backs: HBoxContainer = $Root/EnemyPanel/EnemyRow/EnemyHand/Backs
 @onready var enemy_count_lbl: Label = $Root/EnemyPanel/EnemyRow/EnemyHand/CountBadge/CountLabel
 @onready var player_name_lbl: Label = $Root/PlayerPanel/PlayerName
-@onready var player_hp_bar: ProgressBar = $Root/PlayerPanel/PlayerHPWrap/PlayerHPBar
-@onready var player_hp_lbl: Label = $Root/PlayerPanel/PlayerHPWrap/PlayerHP
+@onready var player_hp_slot: Control = $Root/PlayerPanel/PlayerHPSlot
+@onready var player_hp_wrap: Control = $PlayerHPWrap
+@onready var player_hp_clip: Control = $PlayerHPWrap/PlayerHPBar/FillClip
+@onready var player_hp_lbl: Label = $PlayerHPWrap/PlayerHP
 @onready var phase_lbl: Label = $Root/PhaseLabel
 @onready var log_lbl: Label = $Root/LogPanel/LogText
 @onready var hand_area: ScrollContainer = $Root/HandRow/HandArea
@@ -58,6 +66,7 @@ const UI_BACK := "res://assets/ui/card_back.png"
 @onready var discard_art: TextureRect = $PlayerDiscard/DiscardArt
 @onready var player_discard_count: Label = $PlayerDiscard/PlayerDiscardBadge/PlayerDiscardCount
 @onready var fly_layer: Control = $FlyLayer
+@onready var origin_trail: Line2D = $PlayReveal/OriginTrail
 @onready var reveal_layer: Control = $PlayReveal
 @onready var reveal_group: Control = $PlayReveal/RevealGroup
 @onready var reveal_frame: Panel = $PlayReveal/RevealGroup/Frame
@@ -156,11 +165,11 @@ func _refresh() -> void:
 	if ctrl == null:
 		return
 	enemy_name_lbl.text = ctrl.enemy.display_name
-	_sync_hp(enemy_hp_bar, enemy_hp_lbl, ctrl.enemy.hp, ctrl.enemy.max_hp)
+	_sync_hp(enemy_hp_clip, enemy_hp_lbl, ctrl.enemy.hp, ctrl.enemy.max_hp)
 	_align_tracking(false)
 	_sync_enemy_hand()
 	player_name_lbl.text = ctrl.player.display_name
-	_sync_hp(player_hp_bar, player_hp_lbl, ctrl.player.hp, ctrl.player.max_hp)
+	_sync_hp(player_hp_clip, player_hp_lbl, ctrl.player.hp, ctrl.player.max_hp)
 	_align_tracking(true)
 	_sync_piles()
 	_sync_response_choice()
@@ -182,6 +191,8 @@ func _refresh() -> void:
 		discard_hint.text = "Click cards to discard until hand ≤ %d" % ctrl.hand_limit
 
 	_rebuild_hand()
+	call_deferred("_layout_hp_bars")
+	call_deferred("_layout_hand")
 
 func _rebuild_hand() -> void:
 	_clear_children(hand_box)
@@ -329,6 +340,37 @@ func _layout_hud() -> void:
 	_layout_piles()
 	_place_choice_panel()
 	_center_reveal()
+	_layout_hp_bars()
+	_layout_hand()
+
+func _layout_hand() -> void:
+	if hand_area == null or hand_box == null:
+		return
+	var area_w := hand_area.size.x
+	if area_w <= 1.0:
+		return
+	var content_w := 0.0
+	var sep := float(hand_box.get_theme_constant("separation"))
+	var n := hand_box.get_child_count()
+	for i in n:
+		var child := hand_box.get_child(i) as Control
+		if child == null:
+			continue
+		content_w += maxf(child.custom_minimum_size.x, child.size.x)
+		if i > 0:
+			content_w += sep
+	# Stretch the row to the hand area so alignment centers cards clear of the draw pile.
+	hand_box.custom_minimum_size.x = area_w if content_w <= area_w else 0.0
+
+func _layout_hp_bars() -> void:
+	if enemy_hp_slot == null or player_hp_slot == null:
+		return
+	var enemy_slot := enemy_hp_slot.get_global_rect()
+	if enemy_slot.size != Vector2.ZERO:
+		enemy_hp_wrap.global_position = enemy_slot.position
+	var player_slot := player_hp_slot.get_global_rect()
+	if player_slot.size != Vector2.ZERO:
+		player_hp_wrap.global_position = player_slot.position
 
 func _layout_piles() -> void:
 	if player_draw == null or player_discard == null:
@@ -423,20 +465,13 @@ func _center_reveal() -> void:
 	reveal_group.pivot_offset = frame_size * 0.5
 	reveal_group.position = (reveal_layer.size - frame_size) * 0.5
 
-func _sync_hp(bar: ProgressBar, lbl: Label, hp: int, max_hp: int) -> void:
+func _sync_hp(clip: Control, lbl: Label, hp: int, max_hp: int) -> void:
 	var cap := maxi(max_hp, 1)
 	var shown := clampi(hp, 0, cap)
-	bar.max_value = cap
-	bar.value = shown
-	lbl.text = "%d / %d" % [shown, max_hp]
-	var fill := StyleBoxFlat.new()
 	var ratio := float(shown) / float(cap)
-	fill.bg_color = Color(0.77, 0.16, 0.22) if ratio <= 0.34 else Color(0.2, 0.7, 0.38)
-	fill.corner_radius_top_left = 6
-	fill.corner_radius_top_right = 6
-	fill.corner_radius_bottom_right = 6
-	fill.corner_radius_bottom_left = 6
-	bar.add_theme_stylebox_override("fill", fill)
+	clip.position = Vector2(6, 6)
+	clip.size = Vector2(HP_FILL_FULL.x * ratio, HP_FILL_FULL.y)
+	lbl.text = "%d / %d" % [shown, max_hp]
 
 func _on_card_played(card: CardData, by_player: bool) -> void:
 	_reveal_serial += 1
@@ -460,6 +495,7 @@ func _play_next_reveal() -> void:
 		reveal_group.visible = false
 		reveal_group.scale = Vector2.ONE
 		reveal_group.modulate = Color(1, 1, 1, 0)
+		origin_trail.points = PackedVector2Array()
 		return
 	_reveal_playing = true
 	var item: Dictionary = _reveal_queue.pop_front()
@@ -484,6 +520,9 @@ func _play_next_reveal() -> void:
 	var end_c := end_pos + frame_size * 0.5
 	var side := ORIGIN_ARC if by_player else -ORIGIN_ARC
 	var control := (start_c + end_c) * 0.5 + Vector2(side, 0)
+	origin_trail.default_color = TRAIL_PLAYER if by_player else TRAIL_ENEMY
+	origin_trail.modulate = Color(1, 1, 1, 1)
+	origin_trail.points = PackedVector2Array([start_c, start_c])
 	if _reveal_tween != null and _reveal_tween.is_valid():
 		_reveal_tween.kill()
 	_reveal_tween = create_tween()
@@ -491,12 +530,13 @@ func _play_next_reveal() -> void:
 	_reveal_tween.tween_method(
 		_reveal_arc_step.bind(start_c, control, end_c, frame_size),
 		0.0, 1.0, ORIGIN_FLY_SEC
-	).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_reveal_tween.tween_property(reveal_group, "scale", Vector2.ONE, ORIGIN_FLY_SEC) \
-		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-	_reveal_tween.tween_property(reveal_group, "modulate:a", 1.0, 0.1)
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	_reveal_tween.tween_property(reveal_group, "modulate:a", 1.0, 0.05)
 	_reveal_tween.chain().tween_interval(REVEAL_HOLD_SEC)
-	_reveal_tween.tween_callback(_on_reveal_hold_ended)
+	_reveal_tween.parallel().tween_property(origin_trail, "modulate:a", 0.0, 0.2)
+	_reveal_tween.chain().tween_callback(_on_reveal_hold_ended)
 	_reveal_tween.tween_property(reveal_group, "modulate:a", 0.0, REVEAL_OUT_SEC)
 	_reveal_tween.tween_callback(_on_reveal_finished)
 
@@ -505,6 +545,8 @@ func _reveal_arc_step(t: float, start: Vector2, control: Vector2, end: Vector2, 
 		return
 	var p := _quad(start, control, end, t)
 	reveal_group.position = p - frame_size * 0.5
+	if origin_trail != null:
+		origin_trail.points = PackedVector2Array([start, p])
 
 func _reveal_pos_for_center(global_center: Vector2) -> Vector2:
 	var local_center := global_center
