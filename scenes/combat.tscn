@@ -239,11 +239,20 @@ horizontal_alignment = 1
 
 [node name="PlayerPanel" type="VBoxContainer" parent="Root"]
 layout_mode = 2
+theme_override_constants/separation = 0
 
 [node name="PlayerName" type="Label" parent="Root/PlayerPanel"]
+z_index = 8
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_font_sizes/font_size = 22
 text = "You"
+vertical_alignment = 0
+
+[node name="PlayerNameGap" type="Control" parent="Root/PlayerPanel"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
 
 [node name="PlayerHPSlot" type="Control" parent="Root/PlayerPanel"]
 custom_minimum_size = Vector2(360, 32)
@@ -646,7 +655,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="EndTurn" type="Button" parent="."]
-z_index = 70
+z_index = 100
 custom_minimum_size = Vector2(160, 48)
 layout_mode = 0
 offset_left = 560.0

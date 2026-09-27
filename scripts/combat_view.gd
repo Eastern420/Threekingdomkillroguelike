@@ -105,6 +105,7 @@ var _dodge_pointer: bool = false
 var _dodge_focus: bool = false
 var _hit_pointer: bool = false
 var _hit_focus: bool = false
+var _anchor_layout_queued: bool = false
 
 func _ready() -> void:
 	discard_hint.visible = false
@@ -204,9 +205,8 @@ func _refresh() -> void:
 	# Rebuild after the card button's pressed signal returns. free()/remove_child
 	# on that button while it is still emitting locks the object and stalls the frame.
 	call_deferred("_rebuild_hand")
-	call_deferred("_layout_hp_bars")
 	call_deferred("_layout_hand")
-	call_deferred("_layout_end_turn")
+	call_deferred("_layout_anchored_hud")
 
 func _rebuild_hand() -> void:
 	_clear_children(hand_box)
@@ -359,24 +359,104 @@ func _place_choice_panel() -> void:
 	choice_panel.position = top_left
 
 func _layout_hud() -> void:
-	_layout_piles()
 	_place_choice_panel()
 	_center_reveal()
-	_layout_hp_bars()
 	_layout_hand()
+	_layout_anchored_hud()
+
+func _layout_anchored_hud() -> void:
+	_layout_hp_bars()
+	_layout_piles()
+	_layout_end_turn()
+	# Card slots get their global rects on the container sort after this call.
+	if not _anchor_layout_queued:
+		_anchor_layout_queued = true
+		call_deferred("_layout_anchored_hud_final")
+
+func _layout_anchored_hud_final() -> void:
+	_anchor_layout_queued = false
+	_layout_hp_bars()
+	_layout_piles()
 	_layout_end_turn()
 
 func _layout_end_turn() -> void:
-	# Pinned to the viewport, not the column. A tall combat log used to grow
-	# Root past 720px and slide this button off the bottom.
+	# Directly under the center of the player's hand, above piles and flyers.
+	# A tall combat log used to grow Root past 720px and slide this button off.
 	if btn_end == null:
 		return
 	var btn_size := btn_end.custom_minimum_size
 	if btn_size.y < 1.0:
 		btn_size = Vector2(160, 48)
 	btn_end.size = btn_size
-	btn_end.position = Vector2((size.x - btn_size.x) * 0.5, size.y - 16.0 - btn_size.y)
-	btn_end.z_index = 70
+	btn_end.z_index = 100
+	var hand_rect := _card_cluster_rect()
+	var x := hand_rect.get_center().x - btn_size.x * 0.5
+	var y := hand_rect.end.y + 8.0
+	btn_end.global_position = Vector2(x, y)
+	_clamp_end_turn()
+	_separate_end_turn_from_piles()
+
+func _clamp_end_turn() -> void:
+	var margin := 8.0
+	var p := btn_end.global_position
+	p.x = clampf(p.x, margin, maxf(margin, size.x - margin - btn_end.size.x))
+	p.y = clampf(p.y, margin, maxf(margin, size.y - margin - btn_end.size.y))
+	btn_end.global_position = p
+
+func _separate_end_turn_from_piles() -> void:
+	var piles: Array[Control] = []
+	if player_draw != null:
+		piles.append(player_draw)
+	if player_discard != null:
+		piles.append(player_discard)
+	for _step in 4:
+		var btn_rect := btn_end.get_global_rect().grow(4.0)
+		var hit: Control = null
+		for pile in piles:
+			if btn_rect.intersects(_pile_bounds(pile)):
+				hit = pile
+				break
+		if hit == null:
+			return
+		var prect := _pile_bounds(hit)
+		var up_y := prect.position.y - 8.0 - btn_end.size.y
+		if up_y >= 8.0:
+			btn_end.global_position.y = up_y
+		else:
+			var hand_cx := _card_cluster_rect().get_center().x
+			if prect.get_center().x >= hand_cx:
+				btn_end.global_position.x = prect.position.x - 8.0 - btn_end.size.x
+			else:
+				btn_end.global_position.x = prect.end.x + 8.0
+		_clamp_end_turn()
+
+func _pile_bounds(pile: Control) -> Rect2:
+	# The count badge hangs off the top-right of the stack.
+	return pile.get_global_rect().grow_individual(0.0, 10.0, 14.0, 0.0)
+
+func _card_cluster_rect() -> Rect2:
+	if hand_box != null:
+		var merged := Rect2()
+		var any := false
+		for child in hand_box.get_children():
+			var c := child as Control
+			if c == null or not c.visible:
+				continue
+			var r := c.get_global_rect()
+			if r.size.x < 2.0 or r.size.y < 2.0:
+				continue
+			if not any:
+				merged = r
+				any = true
+			else:
+				merged = merged.merge(r)
+		if any:
+			return merged
+	if hand_area != null:
+		var area := hand_area.get_global_rect()
+		if area.size.x > 1.0 and area.size.y > 1.0:
+			return area
+	return Rect2(Vector2(size.x * 0.5 - 80.0, size.y - 200.0), Vector2(160.0, 142.0))
 
 func _layout_hand() -> void:
 	if hand_area == null or hand_box == null:
@@ -394,7 +474,7 @@ func _layout_hand() -> void:
 		content_w += maxf(child.custom_minimum_size.x, child.size.x)
 		if i > 0:
 			content_w += sep
-	# Stretch the row to the hand area so alignment centers cards clear of the draw pile.
+	# Stretch the row so the cards stay centered in the hand area.
 	hand_box.custom_minimum_size.x = area_w if content_w <= area_w else 0.0
 
 func _layout_hp_bars() -> void:
@@ -410,10 +490,27 @@ func _layout_hp_bars() -> void:
 func _layout_piles() -> void:
 	if player_draw == null or player_discard == null:
 		return
-	player_draw.position = Vector2(48, size.y - 220)
 	player_draw.size = DRAW_PILE_SIZE
-	player_discard.position = Vector2(size.x - 48 - DRAW_PILE_SIZE.x, size.y - 220)
 	player_discard.size = DRAW_PILE_SIZE
+	var gap := 16.0
+	var bar := player_hp_wrap.get_global_rect()
+	var x := bar.end.x + gap
+	var y := bar.position.y + (bar.size.y - DRAW_PILE_SIZE.y) * 0.5
+	if bar.size == Vector2.ZERO:
+		x = 400.0
+		y = size.y - 280.0
+	var pile := Rect2(Vector2(x, y), DRAW_PILE_SIZE)
+	var cards := _card_cluster_rect()
+	if pile.grow_individual(0.0, 10.0, 14.0, 4.0).intersects(cards.grow(8.0)):
+		y = cards.position.y - gap - DRAW_PILE_SIZE.y
+	var name_rect := player_name_lbl.get_global_rect()
+	if name_rect.size != Vector2.ZERO and Rect2(Vector2(x, y), DRAW_PILE_SIZE).grow(6.0).intersects(name_rect):
+		x = name_rect.end.x + gap
+		y = name_rect.position.y
+	x = clampf(x, 8.0, maxf(8.0, size.x - 8.0 - DRAW_PILE_SIZE.x))
+	y = clampf(y, 8.0, maxf(8.0, size.y - 8.0 - DRAW_PILE_SIZE.y))
+	player_draw.global_position = Vector2(x, y)
+	player_discard.global_position = Vector2(size.x - 48.0 - DRAW_PILE_SIZE.x, size.y - 220.0)
 
 func _on_await_discard(_excess: int) -> void:
 	discard_mode = true
